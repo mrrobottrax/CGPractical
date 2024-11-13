@@ -60,7 +60,19 @@ Shader "Custom/Rim Light"
 			float4 frag(Varyings v) : SV_TARGET
 			{
 				float3 albedo = _MainTex.Sample(sampler_MainTex, v.uv).rgb;
-				//float rim = dot()
+
+				// Normalize the world space normal and view direction
+				half3 normalWS = normalize(IN.normalWS);
+				half3 viewDirWS = normalize(IN.viewDirWS);
+
+				// Rim lighting calculation (using dot product between normal and view direction)
+				half rimFactor = 1.0 - saturate(dot(viewDirWS, normalWS));
+				half rimLighting = pow(rimFactor, _RimPower);
+
+				// Combine rim lighting color with the base color
+				half3 finalColor = albedo.rgb + _RimColor.rgb * rimLighting;
+
+				float rim = dot()
 
 				return float4(albedo.rgb, 1);
 			}
