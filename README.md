@@ -1,5 +1,7 @@
 Ivan Ho and Andrew Hoult
 
+We didn't add the build as a release because there wasn't enough time.
+
 We decided to import a rim light as our first shader because the rim light will happen when the player takes damage highlighting the player as red, and a toon shader because the game is a cartoony game and it brings the character to life.
 For the post processing, we decided to important a blood affect to give feedback to the player when they are hit.
 
