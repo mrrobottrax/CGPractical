@@ -2,35 +2,36 @@ Ivan Ho and Andrew Hoult
 
 We didn't add the build as a release because there wasn't enough time.
 
-We decided to import a rim light as our first shader because the rim light will happen when the player takes damage highlighting the player as red, and a toon shader because the game is a cartoony game and it brings the character to life.
-For the post processing, we decided to important a blood affect to give feedback to the player when they are hit.
+# Shader 1: Rim light
+(Rim Light.shader)
 
-Explanation for the shaders:
+Intended to highlight the enemy with a red glow. Can also be used to show enemy or player taking damage.
 
-Properties within the Toon Rim Shader:
+## Properties:
 
-Color: Identifies the base color.
-RampTex: Shading and adding textures like shadows.
-RimColor: The color of the rim.
-RimPower: How strong the rim will be.
+_MainTex (Main Tex): The main texture used for the model.
+_RimColor (Rim Color): The color of the rim lighting effect.
+_RimIntensity (Rim Intensity): A multiplier to make the rim light appear brighter.
+_RimPower (Rim Power): The exponent used for the rim lighting.
 
-Input for the Toon Rim Shader:
+# Shader 2: Toon Shader
+(Toon Shader.shader)
 
-ViewDir: The location we’re looking at it from.
-MainTex: Tracks where our colors will go on the object.
+Gives the objects in the game a cartoonish feel.
 
-Lighting Toon Ramp:
+## Properties:
 
-What should be light and dark.
-Makes things smoother.
-Makes it look cartoony.
+_MainTex (Main Tex): The main texture used for the model.
+_RampTex(Ramp Texture): The texture used filter the lighting. The right side represents the colour of full brightness. The left represents full darkness.
 
-Surf glowing outline:
-
-Base color and finds out where the edges are.
-Makes the edges glow with rim color and how bright it is with rim power.
-
-Damage Effect:
+# Post Processing Effect: Damage Bleed
 Damage.shadergraph
 
-Pressing SPACE will cause a damage effect to appear. This affect causes to screen to turn red, and an image to be overlayed on top. The property _Damage can be used to change the intensity of the effect.
+Pressing SPACE will cause a damage effect to appear. This affect causes to screen to turn red, and an image to be overlayed on top. This is driven by the _Damage property of the material.
+
+This shader is applied fullscreen.
+
+## Properties:
+
+_Blood (Blood): The blood overlay texture to use when taking damage.
+_Damage (Damage): A range from 0-1 specifying the intensity of the effect. Intended to fade from 1 to 0 after taking a hit.
