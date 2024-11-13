@@ -26,8 +26,8 @@ MonoBehaviour:
     probeVolumeBlendStatesCS: {fileID: 7200000, guid: b9a23f869c4fd45f19c5ada54dd82176, type: 3}
   m_RendererFeatures:
   - {fileID: 7833122117494664109}
-  - {fileID: 4152896933614325523}
-  m_RendererFeatureMap: ad6b866f10d7b46c130fe414c20da239
+  - {fileID: 211993386989638995}
+  m_RendererFeatureMap: ad6b866f10d7b46c53d53fbedc26f102
   m_UseNativeRenderPass: 1
   xrSystemData: {fileID: 0}
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
@@ -53,7 +53,7 @@ MonoBehaviour:
   m_DepthTextureFormat: 0
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 0
---- !u!114 &4152896933614325523
+--- !u!114 &211993386989638995
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -69,7 +69,7 @@ MonoBehaviour:
   injectionPoint: 600
   fetchColorBuffer: 1
   requirements: 0
-  passMaterial: {fileID: 2100000, guid: 78a08787ca30045abb69f6f7dd878e09, type: 2}
+  passMaterial: {fileID: 2100000, guid: 7b006dccbf291cb418674e86bce431fc, type: 2}
   passIndex: 0
   bindDepthStencilAttachment: 0
   m_Version: 1
