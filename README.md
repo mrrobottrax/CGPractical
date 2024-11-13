@@ -29,3 +29,8 @@ Surf glowing outline:
 
 Base color and finds out where the edges are.
 Makes the edges glow with rim color and how bright it is with rim power.
+
+Damage Effect:
+Damage.shadergraph
+
+Pressing SPACE will cause a damage effect to appear. This affect causes to screen to turn red, and an image to be overlayed on top. The property _Damage can be used to change the intensity of the effect.
