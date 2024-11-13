@@ -2,7 +2,7 @@ Shader "Custom/Rim Light"
 {
     Properties
     {
-		_MainTex ("Main Tex", 2D) = "white" {}
+		[MainTexture] _MainTex ("Main Tex", 2D) = "white" {}
 		_RimColor ("Rim Color", Color) = (1, 1, 1, 1)
 		_RimIntensity ("Rim Intensity", Float) = 2
 		_RimPower ("Rim Power", Float) = 2
@@ -17,7 +17,6 @@ Shader "Custom/Rim Light"
             "UniversalMaterialType" = "SimpleLit"
             "IgnoreProjector" = "True"
         }
-        LOD 300
 
         Pass
         {
@@ -75,7 +74,7 @@ Shader "Custom/Rim Light"
 			{
 				float3 albedo = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, v.uv).rgb;
 
-				float3 camPos = GetAbsolutePositionWS(float3(0, 0, 0));
+				float3 camPos = GetCurrentViewPosition();
 				float3 dirToCamWS = normalize(camPos - v.positionWS);
 
 				float rim = pow(saturate(1 - dot(v.normalWS, dirToCamWS)), _RimPower);

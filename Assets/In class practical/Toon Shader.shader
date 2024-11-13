@@ -2,42 +2,76 @@ Shader "Custom/Toon Shader"
 {
     Properties
     {
-        _Color("Color", Color) = (1,1,1,1)
-        _RampTex("Ramp Texture", 2D) = "white"{}
+        [MainTexture] _MainTex("Texture", 2D) = "white" {}
+        _RampTex("Ramp Texture", 2D) = "white" {}
     }
 
-        SubShader
+    SubShader
     {
-        CGPROGRAM
-        #pragma surface surf ToonRamp
+		Pass
+		{
+			HLSLPROGRAM
 
-        float4 _Color;
-        sampler2D _RampTex;
+			#include "Packages\com.unity.render-pipelines.universal\ShaderLibrary\Core.hlsl"
+			#include "Packages\com.unity.render-pipelines.universal\ShaderLibrary\Lighting.hlsl"
 
-        float4 LightingToonRamp(SurfaceOutput s, fixed3 lightDir, fixed atten)
-        {
-            float diff = dot(s.Normal, lightDir);
-            float h = diff * 0.5 + 0.5;
-            float2 rh = h;
-            float3 ramp = tex2D(_RampTex, rh).rgb;
+			#pragma fragment frag
+			#pragma vertex vert
 
-            float4 c;
-            c.rgb = s.Albedo * _LightColor0.rgb * (ramp);
-            c.a = s.Alpha;
-            return c;
-        }
+			TEXTURE2D(_MainTex);
+			SAMPLER(sampler_MainTex);
 
-        struct Input
-        {
-            float2 uv_MainTex;
-        };
+			TEXTURE2D(_RampTex);
+			SAMPLER(sampler_RampTex);
 
-        void surf(Input IN, inout SurfaceOutput o)
-        {
-            o.Albedo = _Color.rgb;
-        }
+			struct Attributes
+			{
+				float3 positionOS 	: POSITION;
+				float2 uv			: TEXCOORD0;
+				float3 normalOS 	: NORMAL;
+			};
 
-        ENDCG
+			struct Varyings
+			{
+				float4 positionCS 	: SV_POSITION;
+				float3 positionWS 	: POSITIONT;
+				float3 normalWS		: NORMAL;
+				float2 uv			: TEXCOORD0;
+			};
+
+			Varyings vert(Attributes v)
+			{
+				Varyings o;
+
+				o.positionWS = TransformObjectToWorld(v.positionOS);
+				o.positionCS = TransformWorldToHClip(o.positionWS);
+				o.normalWS = TransformObjectToWorldDir(v.normalOS);
+				o.uv = v.uv;
+
+				return o;
+			}
+
+			float4 frag(Varyings IN) : SV_TARGET
+			{
+				float3 albedo = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, IN.uv).rgb;
+
+				Light mainLight = GetMainLight();
+
+				// Half lambert for a more cartoonish effect
+				float lambert = saturate(dot(mainLight.direction, IN.normalWS)) * 0.5 + 0.5;
+				float rampLambert = SAMPLE_TEXTURE2D(_RampTex, sampler_RampTex, float2(lambert, 0)).r;
+
+				float3 finalColor = albedo * (mainLight.color * rampLambert);
+
+				return float4(finalColor, 1);
+			}
+
+			ENDHLSL
+		}
+
+		UsePass "Universal Render Pipeline/Simple Lit/SHADOWCASTER"
+		UsePass "Universal Render Pipeline/Simple Lit/DEPTHONLY"
     }
-        Fallback "Diffuse"
+
+	Fallback  "Hidden/Universal Render Pipeline/FallbackError"
 }
