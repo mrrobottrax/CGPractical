@@ -497,6 +497,7 @@ GameObject:
   - component: {fileID: 1979433946}
   - component: {fileID: 1979433945}
   - component: {fileID: 1979433944}
+  - component: {fileID: 1979433949}
   m_Layer: 0
   m_Name: Capsule
   m_TagString: Untagged
@@ -610,6 +611,20 @@ Transform:
   - {fileID: 1622202156}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1979433949
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1979433943}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ace0e0fdc662460409f309f349803f44, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  shaderMat: {fileID: 2100000, guid: 7b006dccbf291cb418674e86bce431fc, type: 2}
+  fadeSpeed: 2
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
