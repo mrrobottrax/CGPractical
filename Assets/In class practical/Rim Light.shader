@@ -3,6 +3,8 @@ Shader "Custom/Rim Light"
     Properties
     {
 		_MainTex ("Main Tex", 2D) = "white" {}
+		_RimPower ("Rim Power", Float) = 1
+		_RimColor ("Rim Color", Color) = (1, 0, 0, 1)
     }
 
     SubShader
@@ -35,16 +37,22 @@ Shader "Custom/Rim Light"
 			TEXTURE2D(_MainTex);
 			SAMPLER(sampler_MainTex);
 
+			float3 _RimColor;
+			float _RimPower;
+
 			struct Attributes
 			{
 				float3 positionOS 	: POSITION;
 				float2 uv			: TEXCOORD0;
+				float3 normalOS		: NORMAL;
 			};
 
 			struct Varyings
 			{
 				float4 positionCS 	: SV_POSITION;
 				float2 uv			: TEXCOORD0;
+				float3 normalWS		: NORMAL;
+				float3 viewDirWS	: TEXCOORD1;
 			};
 
 			Varyings vert(Attributes v)
@@ -54,6 +62,13 @@ Shader "Custom/Rim Light"
 				o.positionCS = TransformObjectToHClip(v.positionOS);
 				o.uv = v.uv;
 
+				// Transform object space normal to world space
+				o.normalWS = normalize(TransformObjectToWorldNormal(v.normalOS));
+
+				// Calculate the view direction in world space (from the camera to the surface)
+				float3 worldPosWS = TransformObjectToWorld(v.positionOS.xyz);
+				o.viewDirWS = normalize(GetCameraPositionWS() - worldPosWS);
+
 				return o;
 			}
 
@@ -62,19 +77,17 @@ Shader "Custom/Rim Light"
 				float3 albedo = _MainTex.Sample(sampler_MainTex, v.uv).rgb;
 
 				// Normalize the world space normal and view direction
-				half3 normalWS = normalize(IN.normalWS);
-				half3 viewDirWS = normalize(IN.viewDirWS);
+				half3 normalWS = normalize(v.normalWS);
+				half3 viewDirWS = normalize(v.viewDirWS);
 
 				// Rim lighting calculation (using dot product between normal and view direction)
 				half rimFactor = 1.0 - saturate(dot(viewDirWS, normalWS));
 				half rimLighting = pow(rimFactor, _RimPower);
 
 				// Combine rim lighting color with the base color
-				half3 finalColor = albedo.rgb + _RimColor.rgb * rimLighting;
+				half3 finalColor = lerp(albedo.rgb, _RimColor.rgb, rimLighting);
 
-				float rim = dot()
-
-				return float4(albedo.rgb, 1);
+				return float4(finalColor.rgb, 1);
 			}
             
             ENDHLSL
