@@ -3,6 +3,9 @@ Shader "Custom/Rim Light"
     Properties
     {
 		_MainTex ("Main Tex", 2D) = "white" {}
+		_RimColor ("Rim Color", Color) = (1, 1, 1, 1)
+		_RimIntensity ("Rim Intensity", Float) = 2
+		_RimPower ("Rim Power", Float) = 2
     }
 
     SubShader
@@ -26,6 +29,8 @@ Shader "Custom/Rim Light"
 
 			HLSLPROGRAM
 
+			#define SHADEROPTIONS_CAMERA_RELATIVE_RENDERING (1)
+
 			#include "Packages\com.unity.render-pipelines.universal\ShaderLibrary\Core.hlsl"
 			#include "Packages\com.unity.render-pipelines.universal\ShaderLibrary\Lighting.hlsl"
 
@@ -35,15 +40,22 @@ Shader "Custom/Rim Light"
 			TEXTURE2D(_MainTex);
 			SAMPLER(sampler_MainTex);
 
+			float3 _RimColor;
+			float _RimPower;
+			float _RimIntensity;
+
 			struct Attributes
 			{
 				float3 positionOS 	: POSITION;
 				float2 uv			: TEXCOORD0;
+				float3 normalOS 	: NORMAL;
 			};
 
 			struct Varyings
 			{
 				float4 positionCS 	: SV_POSITION;
+				float3 positionWS 	: POSITIONT;
+				float3 normalWS		: NORMAL;
 				float2 uv			: TEXCOORD0;
 			};
 
@@ -51,7 +63,9 @@ Shader "Custom/Rim Light"
 			{
 				Varyings o;
 
-				o.positionCS = TransformObjectToHClip(v.positionOS);
+				o.positionWS = TransformObjectToWorld(v.positionOS);
+				o.positionCS = TransformWorldToHClip(o.positionWS);
+				o.normalWS = TransformObjectToWorldDir(v.normalOS);
 				o.uv = v.uv;
 
 				return o;
@@ -59,104 +73,23 @@ Shader "Custom/Rim Light"
 
 			float4 frag(Varyings v) : SV_TARGET
 			{
-				float3 albedo = _MainTex.Sample(sampler_MainTex, v.uv).rgb;
-				//float rim = dot()
+				float3 albedo = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, v.uv).rgb;
 
-				return float4(albedo.rgb, 1);
+				float3 camPos = GetAbsolutePositionWS(float3(0, 0, 0));
+				float3 dirToCamWS = normalize(camPos - v.positionWS);
+
+				float rim = pow(saturate(1 - dot(v.normalWS, dirToCamWS)), _RimPower);
+				
+				float3 finalColor = lerp(albedo, _RimColor * _RimIntensity, rim);
+
+				return float4(finalColor, 1);
 			}
             
             ENDHLSL
         }
 
-        Pass
-        {
-            Name "ShadowCaster"
-            Tags
-            {
-                "LightMode" = "ShadowCaster"
-            }
-
-            // -------------------------------------
-            // Render State Commands
-            ZWrite On
-            ZTest LEqual
-            ColorMask 0
-            Cull[_Cull]
-
-            HLSLPROGRAM
-            #pragma target 2.0
-
-            // -------------------------------------
-            // Shader Stages
-            #pragma vertex ShadowPassVertex
-            #pragma fragment ShadowPassFragment
-
-            // -------------------------------------
-            // Material Keywords
-            #pragma shader_feature_local _ALPHATEST_ON
-            #pragma shader_feature_local_fragment _GLOSSINESS_FROM_BASE_ALPHA
-
-            // -------------------------------------
-            // Unity defined keywords
-            #pragma multi_compile _ LOD_FADE_CROSSFADE
-
-            //--------------------------------------
-            // GPU Instancing
-            #pragma multi_compile_instancing
-            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
-
-            // This is used during shadow map generation to differentiate between directional and punctual light shadows, as they use different formulas to apply Normal Bias
-            #pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
-
-            // -------------------------------------
-            // Includes
-            #include "Packages/com.unity.render-pipelines.universal/Shaders/SimpleLitInput.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/Shaders/ShadowCasterPass.hlsl"
-            ENDHLSL
-        }
-
-        Pass
-        {
-            Name "DepthOnly"
-            Tags
-            {
-                "LightMode" = "DepthOnly"
-            }
-
-            // -------------------------------------
-            // Render State Commands
-            ZWrite On
-            ColorMask R
-            Cull[_Cull]
-
-            HLSLPROGRAM
-            #pragma target 2.0
-
-            // -------------------------------------
-            // Shader Stages
-            #pragma vertex DepthOnlyVertex
-            #pragma fragment DepthOnlyFragment
-
-            // -------------------------------------
-            // Material Keywords
-            #pragma shader_feature_local _ALPHATEST_ON
-            #pragma shader_feature_local_fragment _GLOSSINESS_FROM_BASE_ALPHA
-
-            // -------------------------------------
-            // Unity defined keywords
-            #pragma multi_compile _ LOD_FADE_CROSSFADE
-
-            //--------------------------------------
-            // GPU Instancing
-            #pragma multi_compile_instancing
-            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
-
-            // -------------------------------------
-            // Includes
-            #include "Packages/com.unity.render-pipelines.universal/Shaders/SimpleLitInput.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/Shaders/DepthOnlyPass.hlsl"
-            ENDHLSL
-        }
+		UsePass "Universal Render Pipeline/Simple Lit/SHADOWCASTER"
+		UsePass "Universal Render Pipeline/Simple Lit/DEPTHONLY"
     }
 
     Fallback  "Hidden/Universal Render Pipeline/FallbackError"
