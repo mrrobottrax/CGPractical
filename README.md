@@ -1,49 +1,29 @@
-Shader "Custom/RimToon"
-{
-    Properties
-    {
-        _Color ("Color", Color) = (1,1,1,1)
-        _RampTex ("Ramp Texture", 2D) = "white" {}
-        _RimColor ("Rim Color", Color) = (0,0.5,0.5,0.0)
-        _RimPower ("Rim Power", Range(0.5,8.0)) = 3.0
-    }
-    SubShader
-    {
-        CGPROGRAM
-        #pragma surface surf ToonRamp
+Ivan Ho and Andrew Hoult
 
-        struct Input
-        {
-            float3 viewDir;
-            float2 uv_MainTex;
-        };
+We decided to import a rim light as our first shader because the rim light will happen when the player takes damage highlighting the player as red, and a toon shader because the game is a cartoony game and it brings the character to life.
+For the post processing, we decided to important a blood affect to give feedback to the player when they are hit.
 
-        float4 _Color;
-        float4 _RimColor;
-        float _RimPower;
-        sampler2D _RampTex;
+Explanation for the shaders:
 
-        float4 LightingToonRamp (SurfaceOutput s, fixed3 lightDir, fixed atten)
-        {
-            float diff = dot (s.Normal, lightDir);
-            float h = diff * 0.5 + 0.5;
-            float2 rh = h;
-            float3 ramp = tex2D(_RampTex, rh).rgb;
+Properties within the Toon Rim Shader:
 
-            float4 c;
-            c.rgb = s.Albedo * _LightColor0.rgb * (ramp);
-            c.a = s.Alpha;
-            return c;
-        }
+Color: Identifies the base color.
+RampTex: Shading and adding textures like shadows.
+RimColor: The color of the rim.
+RimPower: How strong the rim will be.
 
-        void surf (Input IN, inout SurfaceOutput o)
-        {
-            o.Albedo = _Color.rgb;
+Input for the Toon Rim Shader:
 
-            half rim = 1.0 - saturate(dot(normalize(IN.viewDir), o.Normal));
-            o.Emission = _RimColor.rgb * pow (rim, _RimPower);
-        }
-        ENDCG
-    }
-    FallBack "Diffuse"
-}
+ViewDir: The location we’re looking at it from.
+MainTex: Tracks where our colors will go on the object.
+
+Lighting Toon Ramp:
+
+What should be light and dark.
+Makes things smoother.
+Makes it look cartoony.
+
+Surf glowing outline:
+
+Base color and finds out where the edges are.
+Makes the edges glow with rim color and how bright it is with rim power.
